@@ -38,6 +38,17 @@ def main():
     gs = ChessEngine.GameState()            # gs = game state
     LoadImages()                            # loaded once before infinte loop
     running = True
+    '''
+    the player in to move a piece he selects two squares
+    the first square is the the square at which the piece is located (presses in pawn for example)
+    the second square is the target square to place the piece
+    we are going to create a tuple to store the (x, y) of the current click
+    and a list to store both click, a list of two tuples, so the list will contain
+    1- the selected piece location
+    2- the target square location
+    '''
+    sqSelected = ()     # tuple to keep track of last click ,deafult  no square selected
+    playerClicks = []   # keep track of user clicks, two clicks
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
@@ -52,6 +63,32 @@ def main():
                 # divide the y coordinate by the previous are to get the row
                 col = location[0] // SQ_SIZQ
                 row = location[1] // SQ_SIZQ
+
+                '''
+                now we will check if the sqSelected variable == (row, coloumn)
+                if so then the user already pressed that square, so he wants to deselect it 
+                the the solution to deselect is the following:
+                1- if sqSelected == row, col
+                then empty the sqSelected and empty the list playerClicks
+                this means we return to the state of no square selected which means 
+                we select no square or deselct the selected one
+                if not then record the current click in the tuple and append that to the list 
+                then check if the length of the list is equal 2, then we have the 2 locations
+                '''
+                if sqSelected == (row, col):
+                    sqSelected = ()
+                    playerClicks = []
+                else:
+                    sqSelected = (row, col)
+                    playerClicks.append(sqSelected)
+                
+                if len(playerClicks) == 2 :
+                    move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+                    print(move.getChessNotation())
+                    gs.makeMove(move)
+                    sqSelected = ()
+                    playerClicks = []
+
         clock.tick(MAX_FPS)
         p.display.flip()
         drawGameState(screen, gs)
